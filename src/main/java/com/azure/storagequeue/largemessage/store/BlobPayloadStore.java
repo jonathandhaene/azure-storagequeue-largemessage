@@ -236,7 +236,7 @@ public class BlobPayloadStore {
     public String getPayloadFromSasUri(String sasUri) {
         try {
             logger.debug("Retrieving payload from blob using SAS URI");
-            BlobClient blobClient = new BlobClient.Builder()
+            BlobClient blobClient = new com.azure.storage.blob.BlobClientBuilder()
                 .endpoint(sasUri)
                 .buildClient();
             

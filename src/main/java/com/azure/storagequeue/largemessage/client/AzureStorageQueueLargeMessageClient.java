@@ -64,10 +64,15 @@ public class AzureStorageQueueLargeMessageClient {
      */
     private void ensureQueueExists() {
         try {
-            if (!queueClient.exists()) {
-                logger.info("Queue '{}' does not exist. Creating it...", queueClient.getQueueName());
-                queueClient.create();
-                logger.info("Queue '{}' created successfully", queueClient.getQueueName());
+            // Try to create the queue - will fail silently if it already exists
+            queueClient.create();
+            logger.info("Queue '{}' created successfully", queueClient.getQueueName());
+        } catch (com.azure.storage.queue.models.QueueStorageException e) {
+            // Queue already exists - this is expected
+            if (e.getErrorCode() == com.azure.storage.queue.models.QueueErrorCode.QUEUE_ALREADY_EXISTS) {
+                logger.debug("Queue '{}' already exists", queueClient.getQueueName());
+            } else {
+                logger.warn("Failed to create queue: {}", e.getMessage());
             }
         } catch (Exception e) {
             logger.warn("Failed to check/create queue (may already exist): {}", e.getMessage());
