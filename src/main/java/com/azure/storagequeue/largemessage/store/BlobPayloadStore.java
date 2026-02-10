@@ -181,7 +181,7 @@ public class BlobPayloadStore {
             return 0;
         }
 
-        int deletedCount = 0;
+        java.util.concurrent.atomic.AtomicInteger deletedCount = new java.util.concurrent.atomic.AtomicInteger(0);
         OffsetDateTime now = OffsetDateTime.now();
 
         try {
@@ -199,6 +199,7 @@ public class BlobPayloadStore {
                         if (now.isAfter(expiresAt)) {
                             logger.debug("Deleting expired blob: {} (expired at: {})", blobItem.getName(), expiresAt);
                             blobClient.delete();
+                            deletedCount.incrementAndGet();
                         }
                     }
                 } catch (Exception e) {
@@ -206,12 +207,12 @@ public class BlobPayloadStore {
                 }
             });
 
-            logger.info("Cleanup completed. Deleted {} expired blobs", deletedCount);
+            logger.info("Cleanup completed. Deleted {} expired blobs", deletedCount.get());
         } catch (Exception e) {
             logger.error("Failed to cleanup expired blobs", e);
         }
 
-        return deletedCount;
+        return deletedCount.get();
     }
 
     /**
