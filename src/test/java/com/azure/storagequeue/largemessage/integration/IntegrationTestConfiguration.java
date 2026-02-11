@@ -48,18 +48,36 @@ public class IntegrationTestConfiguration {
     @Value("${azure.storagequeue.queue-name}")
     private String baseQueueName;
 
+    // Store unique names to ensure consistency across all beans
+    private final String uniqueContainerName = generateUniqueContainerName();
+    private final String uniqueQueueName = generateUniqueQueueName();
+
     /**
-     * Creates a unique container name for this test run.
+     * Generates a unique container name for this test run.
      */
-    public String getUniqueContainerName() {
-        return baseContainerName + "-" + UUID.randomUUID().toString().substring(0, 8);
+    private String generateUniqueContainerName() {
+        return "test-large-messages-" + UUID.randomUUID().toString().substring(0, 8);
     }
 
     /**
-     * Creates a unique queue name for this test run.
+     * Generates a unique queue name for this test run.
+     */
+    private String generateUniqueQueueName() {
+        return "test-queue-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    /**
+     * Gets the unique container name for this test run.
+     */
+    public String getUniqueContainerName() {
+        return uniqueContainerName;
+    }
+
+    /**
+     * Gets the unique queue name for this test run.
      */
     public String getUniqueQueueName() {
-        return baseQueueName + "-" + UUID.randomUUID().toString().substring(0, 8);
+        return uniqueQueueName;
     }
 
     @Bean

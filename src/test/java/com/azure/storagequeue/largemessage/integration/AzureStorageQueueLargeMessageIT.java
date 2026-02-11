@@ -55,22 +55,24 @@ public class AzureStorageQueueLargeMessageIT {
     @Autowired
     private LargeMessageClientConfiguration config;
 
+    @Autowired
+    private IntegrationTestConfiguration testConfig;
+
     private String containerName;
 
     @BeforeEach
     void setUp() {
-        // Get the container name from the payload store
-        // We need to create the container if it doesn't exist
+        // Get the container name from the test configuration
+        containerName = testConfig.getUniqueContainerName();
+        
+        // Ensure container exists
         try {
-            // Extract container name from the payload store by reflecting on its field
-            // Or we can just use a known pattern
-            containerName = "test-large-messages-" + UUID.randomUUID().toString().substring(0, 8);
             BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerName);
             if (!containerClient.exists()) {
                 containerClient.create();
             }
         } catch (Exception e) {
-            // Container might already exist
+            // Container might already exist, ignore
         }
 
         // Ensure queue is empty before each test
