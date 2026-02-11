@@ -9,7 +9,6 @@
 
 package com.azure.storagequeue.largemessage.client;
 
-import com.azure.core.util.BinaryData;
 import com.azure.storagequeue.largemessage.config.LargeMessageClientConfiguration;
 import com.azure.storagequeue.largemessage.model.BlobPointer;
 import com.azure.storagequeue.largemessage.model.LargeQueueMessage;

@@ -9,6 +9,7 @@
 
 package com.azure.storagequeue.largemessage.store;
 
+import com.azure.core.util.BinaryData;
 import com.azure.storagequeue.largemessage.config.LargeMessageClientConfiguration;
 import com.azure.storagequeue.largemessage.model.BlobPointer;
 import com.azure.storagequeue.largemessage.util.SasTokenGenerator;
@@ -20,7 +21,6 @@ import com.azure.storage.blob.options.BlobParallelUploadOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -82,7 +82,6 @@ public class BlobPayloadStore {
             BlobClient blobClient = containerClient.getBlobClient(blobName);
             
             byte[] payloadBytes = payload.getBytes(StandardCharsets.UTF_8);
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(payloadBytes);
             
             // Create metadata map
             Map<String, String> metadata = new HashMap<>();
@@ -94,8 +93,9 @@ public class BlobPayloadStore {
                 logger.debug("Setting blob TTL: {} days (expires at: {})", config.getBlobTtlDays(), expiresAt);
             }
             
-            // Create upload options
-            BlobParallelUploadOptions options = new BlobParallelUploadOptions(inputStream, payloadBytes.length);
+            // Create upload options using BinaryData (non-deprecated approach)
+            BinaryData binaryData = BinaryData.fromBytes(payloadBytes);
+            BlobParallelUploadOptions options = new BlobParallelUploadOptions(binaryData);
             if (!metadata.isEmpty()) {
                 options.setMetadata(metadata);
             }

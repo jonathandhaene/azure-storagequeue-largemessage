@@ -235,9 +235,7 @@ public class AzureStorageQueueLargeMessageIT {
         LargeQueueMessage receivedMessage = messages.getFirst();
         assertTrue(receivedMessage.isPayloadFromBlob());
         assertNotNull(receivedMessage.getBlobPointer());
-
-        // Store blob pointer for verification
-        String blobName = receivedMessage.getBlobPointer().getBlobName();
+        assertNotNull(receivedMessage.getBlobPointer().getBlobName());
 
         // When: We delete the message (with cleanupBlobOnDelete=true)
         client.deleteMessage(receivedMessage);
