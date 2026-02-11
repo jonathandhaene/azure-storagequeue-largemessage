@@ -1,0 +1,46 @@
+name: Azure Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_azure_tests:
+        description: 'Confirm running tests against real Azure resources'
+        required: true
+        default: 'false'
+        type: boolean
+
+jobs:
+  azure-tests:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.run_azure_tests == 'true' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run Azure integration tests
+        env:
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+        run: mvn verify -Pintegration-test -e
+
+      - name: Print test results on failure
+        if: failure()
+        run: |
+          echo "=== Failsafe Summary ==="
+          cat target/failsafe-reports/failsafe-summary.xml || true
+          echo ""
+          echo "=== Test Reports ==="
+          find target/failsafe-reports -name "*.txt" -exec echo "--- {} ---" \; -exec cat {} \; || true
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: azure-test-results
+          path: target/failsafe-reports/

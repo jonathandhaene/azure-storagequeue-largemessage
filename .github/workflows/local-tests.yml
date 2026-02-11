@@ -1,4 +1,4 @@
-name: Integration Tests
+name: Local Tests (Azurite)
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  integration-tests:
+  local-tests:
     runs-on: ubuntu-latest
 
     services:
@@ -39,7 +39,7 @@ jobs:
           echo "Checking Azurite queue service..."
           curl -v http://127.0.0.1:10001/devstoreaccount1?comp=list || true
 
-      - name: Run integration tests
+      - name: Run local integration tests (Azurite)
         run: mvn verify -Pintegration-test -e
 
       - name: Print test results on failure
@@ -55,5 +55,5 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results
+          name: local-test-results
           path: target/failsafe-reports/
