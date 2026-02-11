@@ -14,6 +14,7 @@ import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.queue.QueueClient;
 import com.azure.storage.queue.QueueClientBuilder;
 import com.azure.storagequeue.largemessage.client.AzureStorageQueueLargeMessageClient;
+import com.azure.storagequeue.largemessage.config.AzureLargeMessageClientAutoConfiguration;
 import com.azure.storagequeue.largemessage.config.DefaultMessageSizeCriteria;
 import com.azure.storagequeue.largemessage.config.LargeMessageClientConfiguration;
 import com.azure.storagequeue.largemessage.config.MessageSizeCriteria;
@@ -33,7 +34,7 @@ import java.util.UUID;
  * Test configuration for integration tests.
  * Creates beans with dynamic queue and container names to avoid conflicts.
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = {AzureLargeMessageClientAutoConfiguration.class})
 public class IntegrationTestConfiguration {
 
     @Value("${azure.storage.connection-string}")
