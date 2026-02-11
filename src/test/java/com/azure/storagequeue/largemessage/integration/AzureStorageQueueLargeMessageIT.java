@@ -297,6 +297,11 @@ public class AzureStorageQueueLargeMessageIT {
     void testAlwaysThroughBlobMode() {
         // Given: A configuration with always-through-blob enabled
         config.setAlwaysThroughBlob(true);
+        // Update the MessageSizeCriteria to reflect the new setting
+        config.setMessageSizeCriteria(new com.azure.storagequeue.largemessage.config.DefaultMessageSizeCriteria(
+            config.getMessageSizeThreshold(),
+            true // alwaysThroughBlob
+        ));
 
         // Create a new client with the updated configuration
         AzureStorageQueueLargeMessageClient alwaysBlobClient = 
@@ -328,6 +333,10 @@ public class AzureStorageQueueLargeMessageIT {
         } finally {
             // Reset configuration
             config.setAlwaysThroughBlob(false);
+            config.setMessageSizeCriteria(new com.azure.storagequeue.largemessage.config.DefaultMessageSizeCriteria(
+                config.getMessageSizeThreshold(),
+                false // alwaysThroughBlob
+            ));
         }
     }
 
