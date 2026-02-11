@@ -37,8 +37,8 @@ git add -A
 git commit -m "Initial commit"
 
 # Delete old branch and rename new one
-git branch -D $CURRENT_BRANCH
-git branch -M temp-clean-history $CURRENT_BRANCH
+git branch -D "$CURRENT_BRANCH"
+git branch -M temp-clean-history "$CURRENT_BRANCH"
 
 echo ""
 echo "✅ Clean history created!"
@@ -49,6 +49,6 @@ echo ""
 echo "Total commits: $(git rev-list --count HEAD)"
 echo ""
 echo "⚠️  To complete the process, you need to force push:"
-echo "   git push origin $CURRENT_BRANCH --force"
+echo "   git push origin \"$CURRENT_BRANCH\" --force"
 echo ""
 echo "Note: Make sure you have backup before force pushing!"
