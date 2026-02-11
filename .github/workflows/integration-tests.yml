@@ -16,6 +16,11 @@ jobs:
         ports:
           - 10000:10000
           - 10001:10001
+        options: >-
+          --health-cmd "nc -z 127.0.0.1 10000 && nc -z 127.0.0.1 10001"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
@@ -27,13 +32,24 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Wait for Azurite
+      - name: Verify Azurite is running
         run: |
-          timeout 30 bash -c 'until curl -s http://localhost:10000 > /dev/null 2>&1; do sleep 1; done'
-          timeout 30 bash -c 'until curl -s http://localhost:10001 > /dev/null 2>&1; do sleep 1; done'
+          echo "Checking Azurite blob service..."
+          curl -v http://127.0.0.1:10000/devstoreaccount1?comp=list || true
+          echo "Checking Azurite queue service..."
+          curl -v http://127.0.0.1:10001/devstoreaccount1?comp=list || true
 
       - name: Run integration tests
-        run: mvn verify -Pintegration-test
+        run: mvn verify -Pintegration-test -e
+
+      - name: Print test results on failure
+        if: failure()
+        run: |
+          echo "=== Failsafe Summary ==="
+          cat target/failsafe-reports/failsafe-summary.xml || true
+          echo ""
+          echo "=== Test Reports ==="
+          find target/failsafe-reports -name "*.txt" -exec echo "--- {} ---" \; -exec cat {} \; || true
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
