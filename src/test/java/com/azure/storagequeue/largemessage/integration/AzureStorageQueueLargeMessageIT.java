@@ -52,23 +52,32 @@ import static org.junit.jupiter.api.Assertions.*;
  *   <li>Peek messages – non-consuming read</li>
  * </ul>
  *
- * <p><b>Features NOT yet integration-tested:</b></p>
+ * <p><b>Implemented features NOT yet integration-tested:</b></p>
  * <ul>
- *   <li><b>Compression</b> – GZIP payloads before blob upload
- *       (CompressionHandler is unit-tested, but never used end-to-end)</li>
- *   <li><b>Deduplication</b> – SHA-256 duplicate detection
- *       (DeduplicationHandler is unit-tested, but never used end-to-end)</li>
- *   <li><b>Dead-letter queue</b> – routing poison messages to a DLQ
- *       (DeadLetterQueueHandler has no tests at all)</li>
- *   <li><b>SAS token access</b> – generating SAS URLs for blob access
- *       (SasTokenGenerator has no tests at all)</li>
- *   <li><b>Error / resilience scenarios</b> – network failures, missing blobs,
- *       corrupt data, expired SAS tokens</li>
- *   <li><b>Receive-only mode</b> – client that only reads, never sends</li>
- *   <li><b>Blob TTL / access tier</b> – lifecycle management settings</li>
- *   <li><b>Blob key prefix</b> – verified indirectly but not asserted</li>
- *   <li><b>Retry behaviour</b> – RetryHandler is unit-tested but never
- *       triggered in integration tests (would need fault injection)</li>
+ *   <li><b>Compression</b> – implemented in {@code AzureStorageQueueLargeMessageClient}
+ *       via {@code CompressionHandler.compressToBase64/decompressFromBase64};
+ *       unit-tested in isolation but never exercised end-to-end</li>
+ *   <li><b>Deduplication</b> – implemented in {@code sendMessage} via
+ *       {@code DeduplicationHandler.isDuplicate()}; unit-tested in isolation
+ *       but never exercised end-to-end</li>
+ *   <li><b>Dead-letter queue</b> – implemented in {@code DeadLetterQueueHandler}
+ *       and called during {@code receiveMessages}; has no tests at all
+ *       (unit or integration)</li>
+ *   <li><b>SAS token access</b> – implemented in {@code SasTokenGenerator}
+ *       and used by {@code BlobPayloadStore.generateSasUri()}; has no tests
+ *       at all (unit or integration)</li>
+ *   <li><b>Orphaned blob rollback</b> – implemented in {@code sendMessage};
+ *       deletes blob if queue enqueue fails after blob upload</li>
+ *   <li><b>Error / resilience scenarios</b> – retry logic is implemented via
+ *       {@code RetryHandler} and unit-tested, but never triggered under real
+ *       failure conditions (would need fault injection)</li>
+ *   <li><b>Receive-only mode</b> – {@code receiveOnlyMode} config flag is
+ *       implemented but never tested</li>
+ *   <li><b>Blob TTL / access tier</b> – implemented in {@code BlobPayloadStore}
+ *       ({@code cleanupExpiredBlobs}, access tier config) but never tested</li>
+ *   <li><b>Blob key prefix</b> – configured in test YAML as {@code "test-messages/"}
+ *       and used by {@code DefaultBlobNameResolver}, but the prefix in blob names
+ *       is never explicitly asserted</li>
  * </ul>
  */
 @SpringBootTest(classes = {IntegrationTestConfiguration.class})

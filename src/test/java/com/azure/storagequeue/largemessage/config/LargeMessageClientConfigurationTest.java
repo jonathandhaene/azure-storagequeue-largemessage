@@ -38,10 +38,12 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * <p><b>Not yet covered:</b></p>
  * <ul>
- *   <li>Invalid / negative values (e.g. negative threshold, 0 retry attempts)</li>
+ *   <li>Invalid / negative values (e.g. negative threshold, 0 retry attempts –
+ *       no validation exists in source, causes subtle bugs)</li>
  *   <li>Null values for string properties (prefix, access tier, DLQ name)</li>
- *   <li>Interaction between related flags (e.g. receiveOnly + alwaysThroughBlob)</li>
- *   <li>Spring property binding (actual YAML → config deserialization)</li>
+ *   <li>Interaction between conflicting flags (e.g. receiveOnly + alwaysThroughBlob)</li>
+ *   <li>Spring property binding (actual YAML → config deserialization via
+ *       {@code @ConfigurationProperties})</li>
  * </ul>
  */
 @DisplayName("LargeMessageClientConfiguration – config defaults & setters")

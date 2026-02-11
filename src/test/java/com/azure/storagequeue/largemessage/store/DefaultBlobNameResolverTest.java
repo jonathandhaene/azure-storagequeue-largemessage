@@ -35,7 +35,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * <ul>
  *   <li>Prefix with special characters (slashes, dots, unicode)</li>
  *   <li>Very long prefix values (max blob name length is 1024 chars)</li>
- *   <li>Thread safety of UUID generation under concurrent access</li>
  * </ul>
  */
 @DisplayName("DefaultBlobNameResolver – UUID-based blob naming")

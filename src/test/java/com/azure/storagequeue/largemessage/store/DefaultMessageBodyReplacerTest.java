@@ -32,9 +32,8 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * <p><b>Not yet covered:</b></p>
  * <ul>
- *   <li>Null BlobPointer argument</li>
- *   <li>BlobPointer with null/empty fields</li>
- *   <li>Verifying the BLOB_POINTER_MARKER prefix is present</li>
+ *   <li>Null BlobPointer argument (will NPE on {@code pointer.toJson()})</li>
+ *   <li>BlobPointer with null/empty fields (Jackson serializes to JSON {@code null})</li>
  * </ul>
  */
 @DisplayName("DefaultMessageBodyReplacer – pointer replacement")

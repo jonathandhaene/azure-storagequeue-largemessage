@@ -37,10 +37,11 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * <p><b>Not yet covered:</b></p>
  * <ul>
- *   <li>Null input handling</li>
- *   <li>Compression of already-compressed data (double compression)</li>
- *   <li>Compression ratio for realistic JSON message payloads</li>
- *   <li>Memory usage with very large payloads (e.g. 256MB)</li>
+ *   <li>Null input handling (will NPE on {@code payload.getBytes()})</li>
+ *   <li>Double compression (compressing already-compressed data)</li>
+ *   <li>Integration with the client send/receive pipeline
+ *       ({@code AzureStorageQueueLargeMessageClient} calls
+ *       {@code compressToBase64}/{@code decompressFromBase64})</li>
  * </ul>
  */
 @DisplayName("CompressionHandler – GZIP + Base64 compression")

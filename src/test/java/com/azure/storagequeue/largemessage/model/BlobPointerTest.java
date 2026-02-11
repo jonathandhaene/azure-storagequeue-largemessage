@@ -33,9 +33,10 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * <p><b>Not yet covered:</b></p>
  * <ul>
- *   <li>Null or empty container/blob names</li>
- *   <li>Special characters in names (slashes, unicode)</li>
- *   <li>Malformed JSON input to fromJson</li>
+ *   <li>Null or empty container/blob names (constructor accepts them silently)</li>
+ *   <li>Special characters in names (slashes create virtual blob directories)</li>
+ *   <li>Malformed JSON input to {@code fromJson} (throws {@code RuntimeException}
+ *       wrapping Jackson's {@code JsonProcessingException})</li>
  * </ul>
  */
 @DisplayName("BlobPointer – blob reference value object")

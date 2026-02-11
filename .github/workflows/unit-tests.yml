@@ -30,13 +30,13 @@
 #   │  • RetryHandlerTest                     – exponential backoff      │
 #   └─────────────────────────────────────────────────────────────────────┘
 #
-# NOT tested here (no unit tests exist yet):
-#   • AzureStorageQueueLargeMessageClient  – core client (only integration-tested)
-#   • BlobPayloadStore                     – blob upload/download logic
-#   • SasTokenGenerator                    – SAS token creation
-#   • DeadLetterQueueHandler               – dead-letter queue routing
-#   • LargeQueueMessage                    – message model (getters/setters)
-#   • AzureLargeMessageClientAutoConfiguration – Spring auto-config
+# Source classes WITHOUT unit tests (implemented but only integration-tested or untested):
+#   • AzureStorageQueueLargeMessageClient  – core client (integration-tested only)
+#   • BlobPayloadStore                     – blob upload/download (integration-tested only)
+#   • SasTokenGenerator                    – SAS token creation (no tests at all)
+#   • DeadLetterQueueHandler               – DLQ routing (no tests at all)
+#   • LargeQueueMessage                    – message model (no dedicated tests)
+#   • AzureLargeMessageClientAutoConfiguration – Spring auto-config (no tests)
 #
 # ============================================================================
 name: Unit Tests

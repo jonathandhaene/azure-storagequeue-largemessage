@@ -32,8 +32,9 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * <p><b>Not yet covered:</b></p>
  * <ul>
- *   <li>Empty string ("") – should it be treated differently from null?</li>
- *   <li>Whitespace-only strings</li>
+ *   <li>Empty string ({@code ""}) – stored as-is but will fail Azure SDK
+ *       downstream (e.g. {@code BlobServiceClientBuilder.connectionString("")})</li>
+ *   <li>Whitespace-only strings (no validation; will cause Azure SDK failures)</li>
  * </ul>
  */
 @DisplayName("PlainTextConnectionStringProvider – connection string storage")

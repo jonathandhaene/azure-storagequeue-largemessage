@@ -37,11 +37,11 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * <p><b>Not yet covered:</b></p>
  * <ul>
- *   <li>Null message body</li>
- *   <li>Thread safety under concurrent access</li>
- *   <li>Very large cache sizes (memory pressure)</li>
- *   <li>Hash collision scenarios (unlikely but theoretically possible)</li>
- *   <li>Integration with the actual message receive pipeline</li>
+ *   <li>Null message body (will NPE in {@code computeHash()})</li>
+ *   <li>Concurrent access across multiple threads (individual ops are synchronized,
+ *       but compound check-then-act across calls is not atomically guarded)</li>
+ *   <li>Integration with the actual message send pipeline
+ *       ({@code AzureStorageQueueLargeMessageClient.sendMessage} calls {@code isDuplicate})</li>
  * </ul>
  */
 @DisplayName("DeduplicationHandler – SHA-256 LRU duplicate detection")

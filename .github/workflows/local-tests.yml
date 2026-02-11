@@ -26,14 +26,22 @@
 #   │  8. Peek messages                     – peek without consuming     │
 #   └─────────────────────────────────────────────────────────────────────┘
 #
-# Features NOT covered by integration tests yet:
-#   • Compression        – compressing payloads before blob upload
-#   • Deduplication      – SHA-256 duplicate detection
-#   • Dead-letter queue  – routing poison messages to a DLQ
-#   • SAS token access   – generating SAS URLs for blob access
+# Implemented features NOT covered by integration tests:
+#   • Compression        – GZIP before blob upload (implemented in client,
+#                         unit-tested in CompressionHandlerTest)
+#   • Deduplication      – SHA-256 duplicate detection (implemented in client,
+#                         unit-tested in DeduplicationHandlerTest)
+#   • Dead-letter queue  – routing poison messages (implemented in
+#                         DeadLetterQueueHandler, no tests at all)
+#   • SAS token access   – generating SAS URLs (implemented in
+#                         SasTokenGenerator, no tests at all)
 #   • Error scenarios    – network failures, missing blobs, corrupt data
-#   • Receive-only mode  – client that only reads, never sends
-#   • Blob TTL / access tier – lifecycle management settings
+#                         (retry logic is implemented, never fault-injected)
+#   • Receive-only mode  – client config flag (implemented, never tested)
+#   • Blob TTL / tier    – lifecycle management (implemented in
+#                         BlobPayloadStore, never tested)
+#   • Orphan rollback    – blob cleanup on failed queue enqueue
+#                         (implemented in client, never tested)
 #
 # Relationship to other workflows:
 #   • unit-tests.yml   → runs the *Test.java files (pure unit tests)

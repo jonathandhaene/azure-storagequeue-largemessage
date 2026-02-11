@@ -35,11 +35,12 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * <p><b>Not yet covered:</b></p>
  * <ul>
- *   <li>Backoff timing verification (are delays actually exponential?)</li>
- *   <li>Max backoff cap is respected</li>
- *   <li>Thread interruption during backoff sleep</li>
- *   <li>Non-retryable exceptions (e.g. should IllegalArgumentException be retried?)</li>
- *   <li>Zero or negative maxAttempts</li>
+ *   <li>Backoff timing verification (delays are calculated as exponential but never asserted)</li>
+ *   <li>Max backoff cap ({@code Math.min(delay, maxBackoffMillis)} is implemented but not tested)</li>
+ *   <li>Thread interruption during backoff sleep (handler restores interrupt flag and throws)</li>
+ *   <li>Non-retryable exceptions (all exceptions are retried indiscriminately –
+ *       no distinction between transient and permanent errors)</li>
+ *   <li>Zero or negative maxAttempts (will NPE on null {@code lastException})</li>
  * </ul>
  */
 @DisplayName("RetryHandler – exponential backoff retry logic")

@@ -35,9 +35,10 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * <p><b>Not yet covered:</b></p>
  * <ul>
- *   <li>Null message body (should it throw or return false?)</li>
- *   <li>Multi-byte characters (UTF-8 byte size vs. char length)</li>
- *   <li>Threshold of 0 or negative values</li>
+ *   <li>Null message body (will NPE on {@code messageBody.getBytes()})</li>
+ *   <li>Multi-byte characters – source correctly uses {@code getBytes(UTF_8).length}
+ *       but no test verifies that multi-byte chars (e.g. emoji) are measured by byte count</li>
+ *   <li>Threshold of 0 or negative values (no validation exists in source)</li>
  * </ul>
  */
 @DisplayName("DefaultMessageSizeCriteria – offload decision logic")
