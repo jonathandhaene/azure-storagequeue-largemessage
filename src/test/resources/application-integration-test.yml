@@ -1,0 +1,42 @@
+# Integration Test Configuration for Azure Storage Queue Large Message Client
+# This configuration is used for integration testing with both Azurite (local) and real Azure resources
+
+azure:
+  storage:
+    # Connection string from environment variable
+    # Default to Azurite emulator connection string for local testing
+    connection-string: ${AZURE_STORAGE_CONNECTION_STRING:DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1}
+    # Container name will be set dynamically with UUID suffix in tests
+    container-name: ${AZURE_STORAGE_CONTAINER_NAME:test-large-messages}
+
+  storagequeue:
+    # Connection string from environment variable (falls back to azure.storage.connection-string)
+    connection-string: ${AZURE_STORAGE_CONNECTION_STRING:DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1}
+    # Queue name will be set dynamically with UUID suffix in tests
+    queue-name: ${AZURE_STORAGEQUEUE_QUEUE_NAME:test-queue}
+
+    large-message-client:
+      # Message size threshold: 64 KB
+      message-size-threshold: 65536
+      # Do not force all messages through blob by default
+      always-through-blob: false
+      # Enable automatic blob cleanup on message deletion
+      cleanup-blob-on-delete: true
+      # Blob key prefix for organizing blobs
+      blob-key-prefix: "test-messages/"
+      # Retry configuration
+      retry-max-attempts: 3
+      retry-backoff-millis: 500
+      retry-backoff-multiplier: 2.0
+      retry-max-backoff-millis: 5000
+      # Feature flags
+      ignore-payload-not-found: false
+      receive-only-mode: false
+      # Tracing
+      tracing-enabled: false
+
+# Logging configuration for tests
+logging:
+  level:
+    com.azure.storagequeue.largemessage: DEBUG
+    com.azure.storage: INFO
