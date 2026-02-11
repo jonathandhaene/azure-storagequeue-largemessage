@@ -1,0 +1,79 @@
+# Azure Storage Queue Large Message Client Configuration Example
+
+# Azure Storage Configuration
+azure:
+  storage:
+    # Connection string for Azure Storage Account
+    # You can also set this via AZURE_STORAGE_CONNECTION_STRING environment variable
+    connection-string: ${AZURE_STORAGE_CONNECTION_STRING:DefaultEndpointsProtocol=https;AccountName=myaccount;AccountKey=mykey;EndpointSuffix=core.windows.net}
+    
+    # Blob container name for storing large message payloads
+    container-name: ${AZURE_STORAGE_CONTAINER_NAME:large-messages}
+
+  # Azure Storage Queue Configuration
+  storagequeue:
+    # Queue connection string (defaults to storage connection-string if not set)
+    connection-string: ${AZURE_STORAGEQUEUE_CONNECTION_STRING:${azure.storage.connection-string}}
+    
+    # Queue name
+    queue-name: ${AZURE_STORAGEQUEUE_QUEUE_NAME:my-queue}
+    
+    # Large Message Client Configuration
+    large-message-client:
+      # Message size threshold in bytes (default: 65,536 = 64 KB)
+      # Messages exceeding this size will be offloaded to blob storage
+      # Note: Azure Storage Queue has a 64 KB message limit
+      message-size-threshold: 65536
+      
+      # Force all messages through blob storage (default: false)
+      # When true, even small messages are stored in blob
+      always-through-blob: false
+      
+      # Automatically delete blob payloads when messages are deleted (default: true)
+      cleanup-blob-on-delete: true
+      
+      # Prefix for blob names (default: empty)
+      # Example: "messages/" will create blobs like "messages/uuid"
+      blob-key-prefix: ""
+      
+      # Retry Configuration
+      retry-max-attempts: 3
+      retry-backoff-millis: 1000
+      retry-backoff-multiplier: 2.0
+      retry-max-backoff-millis: 30000
+      
+      # Feature Toggles
+      ignore-payload-not-found: false
+      receive-only-mode: false
+      
+      # Blob Storage Configuration
+      # Access tier: Hot, Cool, or Archive (default: null = use account default)
+      blob-access-tier: null
+      
+      # Blob time-to-live in days (default: 0 = disabled)
+      # Blobs older than this will be eligible for cleanup
+      blob-ttl-days: 0
+      
+      # SAS URI Configuration
+      # Enable SAS URI generation for secure blob access
+      sas-enabled: false
+      
+      # SAS token validity duration (default: P7D = 7 days)
+      # Format: ISO-8601 duration (e.g., P1D = 1 day, PT1H = 1 hour)
+      sas-token-validation-time: P7D
+      
+      # Tracing
+      tracing-enabled: true
+
+# Spring Boot Configuration
+spring:
+  application:
+    name: azure-storagequeue-large-message-example
+  
+  # Logging Configuration
+logging:
+  level:
+    com.azure.storagequeue.largemessage: DEBUG
+    com.azure.storage: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
