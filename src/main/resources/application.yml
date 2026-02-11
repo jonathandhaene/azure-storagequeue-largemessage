@@ -65,6 +65,21 @@ azure:
       # Tracing
       tracing-enabled: true
 
+      # Compression: GZIP-compress blob payloads to reduce storage and bandwidth costs
+      # When enabled, payloads are compressed before upload and decompressed on download
+      compression-enabled: false
+
+      # Deduplication: skip duplicate messages using an in-memory LRU hash cache
+      # Note: local to this JVM — not shared across instances
+      deduplication-enabled: false
+      deduplication-cache-size: 10000
+
+      # Dead-letter queue: move poison messages (exceeded max dequeue count) to a separate queue
+      # The DLQ name defaults to <queue-name>-dlq if not explicitly set
+      dead-letter-enabled: false
+      dead-letter-queue-name: ""
+      dead-letter-max-dequeue-count: 5
+
 # Spring Boot Configuration
 spring:
   application:

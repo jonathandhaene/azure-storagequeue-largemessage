@@ -65,6 +65,18 @@ public class LargeMessageClientConfiguration {
     private boolean sasEnabled = false;
     private java.time.Duration sasTokenValidationTime = java.time.Duration.ofDays(7);
     
+    // Compression
+    private boolean compressionEnabled = false;
+
+    // Deduplication
+    private boolean deduplicationEnabled = false;
+    private int deduplicationCacheSize = 10_000;
+
+    // Dead-letter queue
+    private boolean deadLetterEnabled = false;
+    private String deadLetterQueueName = "";
+    private int deadLetterMaxDequeueCount = 5;
+
     // Tracing
     private boolean tracingEnabled = true;
     
@@ -309,5 +321,87 @@ public class LargeMessageClientConfiguration {
 
     public void setMessageSizeCriteria(MessageSizeCriteria messageSizeCriteria) {
         this.messageSizeCriteria = messageSizeCriteria;
+    }
+
+    /**
+     * Indicates whether GZIP compression is enabled for blob payloads.
+     * When enabled, payloads are compressed before storing in blob storage,
+     * reducing storage costs and network bandwidth.
+     *
+     * @return true if compression is enabled, false otherwise
+     */
+    public boolean isCompressionEnabled() {
+        return compressionEnabled;
+    }
+
+    public void setCompressionEnabled(boolean compressionEnabled) {
+        this.compressionEnabled = compressionEnabled;
+    }
+
+    /**
+     * Indicates whether message deduplication is enabled.
+     * Uses an in-memory LRU cache of content hashes to detect duplicates.
+     *
+     * @return true if deduplication is enabled, false otherwise
+     */
+    public boolean isDeduplicationEnabled() {
+        return deduplicationEnabled;
+    }
+
+    public void setDeduplicationEnabled(boolean deduplicationEnabled) {
+        this.deduplicationEnabled = deduplicationEnabled;
+    }
+
+    /**
+     * Gets the maximum number of message hashes to retain in the deduplication cache.
+     *
+     * @return the deduplication cache size
+     */
+    public int getDeduplicationCacheSize() {
+        return deduplicationCacheSize;
+    }
+
+    public void setDeduplicationCacheSize(int deduplicationCacheSize) {
+        this.deduplicationCacheSize = deduplicationCacheSize;
+    }
+
+    /**
+     * Indicates whether dead-letter queue support is enabled.
+     *
+     * @return true if DLQ is enabled, false otherwise
+     */
+    public boolean isDeadLetterEnabled() {
+        return deadLetterEnabled;
+    }
+
+    public void setDeadLetterEnabled(boolean deadLetterEnabled) {
+        this.deadLetterEnabled = deadLetterEnabled;
+    }
+
+    /**
+     * Gets the name of the dead-letter queue. If empty, defaults to
+     * the main queue name with a "-dlq" suffix.
+     *
+     * @return the dead-letter queue name
+     */
+    public String getDeadLetterQueueName() {
+        return deadLetterQueueName;
+    }
+
+    public void setDeadLetterQueueName(String deadLetterQueueName) {
+        this.deadLetterQueueName = deadLetterQueueName;
+    }
+
+    /**
+     * Gets the maximum dequeue count before a message is dead-lettered.
+     *
+     * @return the max dequeue count for dead-lettering
+     */
+    public int getDeadLetterMaxDequeueCount() {
+        return deadLetterMaxDequeueCount;
+    }
+
+    public void setDeadLetterMaxDequeueCount(int deadLetterMaxDequeueCount) {
+        this.deadLetterMaxDequeueCount = deadLetterMaxDequeueCount;
     }
 }

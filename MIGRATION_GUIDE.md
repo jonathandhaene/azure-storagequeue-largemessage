@@ -103,6 +103,18 @@ azure:
       
       # Tracing
       tracing-enabled: true
+      
+      # Compression – GZIP-compress blob payloads
+      compression-enabled: false
+      
+      # Deduplication – skip duplicate messages (in-memory LRU cache)
+      deduplication-enabled: false
+      deduplication-cache-size: 10000
+      
+      # Dead-letter queue
+      dead-letter-enabled: false
+      dead-letter-queue-name: ""          # defaults to <queue-name>-dlq
+      dead-letter-max-dequeue-count: 5
 ```
 
 ## Basic Usage
@@ -397,6 +409,86 @@ for (LargeQueueMessage message : messages) {
 }
 ```
 
+### Compression
+
+Enable GZIP compression to reduce blob storage usage and network bandwidth:
+
+```yaml
+azure:
+  storagequeue:
+    large-message-client:
+      compression-enabled: true
+```
+
+Compression is **transparent** — consumers do not need to know that compression is enabled. The library automatically compresses payloads before upload and decompresses them on download.
+
+```java
+// No code changes needed — compression is handled internally
+client.sendMessage(largeJsonPayload);  // compressed automatically
+
+List<LargeQueueMessage> msgs = client.receiveMessages(10);
+String body = msgs.get(0).getBody();   // decompressed automatically
+```
+
+> **Tip:** Compression is most effective for repetitive or text-based payloads (e.g., JSON, XML). Binary payloads that are already compressed (images, archives) will not benefit.
+
+### Message Deduplication
+
+Enable in-memory deduplication to silently drop duplicate `sendMessage()` calls:
+
+```yaml
+azure:
+  storagequeue:
+    large-message-client:
+      deduplication-enabled: true
+      deduplication-cache-size: 10000   # max entries in LRU cache
+```
+
+```java
+client.sendMessage("Hello");   // sent
+client.sendMessage("Hello");   // silently skipped (returns null)
+client.sendMessage("World");   // sent
+```
+
+> **Important limitations:**
+> - Deduplication state is **local to the JVM** — not shared across application instances.
+> - The cache uses LRU eviction. Once the cache is full the oldest entry is evicted, so a previously seen message may be accepted again.
+> - For **distributed deduplication**, use an external store (e.g., Redis) and check before calling `sendMessage()`.
+
+### Dead-Letter Queue
+
+Enable automatic dead-lettering for poison messages:
+
+```yaml
+azure:
+  storagequeue:
+    large-message-client:
+      dead-letter-enabled: true
+      dead-letter-queue-name: "my-queue-dlq"   # optional — defaults to <queue-name>-dlq
+      dead-letter-max-dequeue-count: 5
+```
+
+When a message's `dequeueCount` reaches the configured threshold, it is automatically moved to the dead-letter queue and deleted from the main queue during `receiveMessages()`.
+
+```java
+// Messages that fail processing repeatedly are automatically dead-lettered
+List<LargeQueueMessage> messages = client.receiveMessages(10);
+// Only non-poison messages are returned
+
+// You can also access the DLQ handler directly
+DeadLetterQueueHandler dlq = client.getDeadLetterQueueHandler();
+if (dlq != null) {
+    int dlqCount = dlq.getApproximateMessageCount();
+    System.out.println("Dead-letter queue depth: " + dlqCount);
+}
+```
+
+### Orphan Blob Rollback
+
+If the queue send fails after a blob upload, the orphaned blob is **automatically deleted** (rolled back). No configuration is needed — this is the default behaviour.
+
+If the rollback itself fails (e.g., network issue), the blob remains as an orphan. Use `blob-ttl-days` and/or Azure Blob lifecycle management policies as a safety net.
+
 ## Best Practices
 
 ### 1. Set Appropriate Message Size Threshold
@@ -619,7 +711,7 @@ If you're migrating from the Service Bus version of this library:
 
 1. **No Sessions**: Remove session-related code
 2. **No Scheduled Messages**: Use visibility timeout instead
-3. **No Native DLQ**: Implement custom poison message handling
+3. **Dead-Letter Queue**: Now built-in — enable with `dead-letter-enabled: true`
 4. **Message Properties**: Use metadata envelope instead of native properties
 5. **Lock Renewal**: Not supported - use appropriate visibility timeouts
 

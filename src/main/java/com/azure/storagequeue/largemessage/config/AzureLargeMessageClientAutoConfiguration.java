@@ -10,6 +10,7 @@
 package com.azure.storagequeue.largemessage.config;
 
 import com.azure.storagequeue.largemessage.client.AzureStorageQueueLargeMessageClient;
+import com.azure.storagequeue.largemessage.client.DeadLetterQueueHandler;
 import com.azure.storagequeue.largemessage.store.BlobNameResolver;
 import com.azure.storagequeue.largemessage.store.BlobPayloadStore;
 import com.azure.storagequeue.largemessage.store.DefaultBlobNameResolver;
@@ -157,6 +158,26 @@ public class AzureLargeMessageClientAutoConfiguration {
     }
 
     /**
+     * Creates a DeadLetterQueueHandler bean when dead-letter queue support is enabled.
+     *
+     * @param config the large message client configuration
+     * @return the DeadLetterQueueHandler instance
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = "azure.storagequeue.large-message-client.dead-letter-enabled", havingValue = "true")
+    public DeadLetterQueueHandler deadLetterQueueHandler(LargeMessageClientConfiguration config) {
+        String dlqName = config.getDeadLetterQueueName();
+        if (dlqName == null || dlqName.isEmpty()) {
+            dlqName = queueName + DeadLetterQueueHandler.DEFAULT_DLQ_SUFFIX;
+        }
+        return new DeadLetterQueueHandler(
+                queueConnectionString,
+                dlqName,
+                config.getDeadLetterMaxDequeueCount());
+    }
+
+    /**
      * Creates an AzureStorageQueueLargeMessageClient bean.
      * Works in both regular mode (with BlobPayloadStore) and receive-only mode (without).
      *
@@ -166,6 +187,7 @@ public class AzureLargeMessageClientAutoConfiguration {
      * @param blobNameResolver    the blob name resolver
      * @param bodyReplacer        the message body replacer
      * @param messageSizeCriteria the message size criteria
+     * @param dlqHandlerProvider  optional dead-letter queue handler provider
      * @return the AzureStorageQueueLargeMessageClient instance
      */
     @Bean
@@ -176,7 +198,8 @@ public class AzureLargeMessageClientAutoConfiguration {
             org.springframework.beans.factory.ObjectProvider<BlobPayloadStore> payloadStoreProvider,
             BlobNameResolver blobNameResolver,
             MessageBodyReplacer bodyReplacer,
-            MessageSizeCriteria messageSizeCriteria) {
+            MessageSizeCriteria messageSizeCriteria,
+            org.springframework.beans.factory.ObjectProvider<DeadLetterQueueHandler> dlqHandlerProvider) {
         
         // Set custom resolvers in config
         config.setBlobNameResolver(blobNameResolver);
@@ -199,10 +222,13 @@ public class AzureLargeMessageClientAutoConfiguration {
             );
         }
         
+        DeadLetterQueueHandler dlqHandler = dlqHandlerProvider.getIfAvailable();
+        
         return new AzureStorageQueueLargeMessageClient(
             queueClient,
             payloadStore,
-            config
+            config,
+            dlqHandler
         );
     }
 }

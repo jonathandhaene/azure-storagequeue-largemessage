@@ -34,6 +34,15 @@ azure:
       receive-only-mode: false
       # Tracing
       tracing-enabled: false
+      # Compression (disabled for default integration tests)
+      compression-enabled: false
+      # Deduplication (disabled for default integration tests)
+      deduplication-enabled: false
+      deduplication-cache-size: 10000
+      # Dead-letter queue (disabled for default integration tests)
+      dead-letter-enabled: false
+      dead-letter-queue-name: ""
+      dead-letter-max-dequeue-count: 5
 
 # Logging configuration for tests
 logging:
