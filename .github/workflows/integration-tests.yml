@@ -1,0 +1,43 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      azurite:
+        image: mcr.microsoft.com/azure-storage/azurite
+        ports:
+          - 10000:10000
+          - 10001:10001
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Wait for Azurite
+        run: |
+          timeout 30 bash -c 'until curl -s http://localhost:10000 > /dev/null 2>&1; do sleep 1; done'
+          timeout 30 bash -c 'until curl -s http://localhost:10001 > /dev/null 2>&1; do sleep 1; done'
+
+      - name: Run integration tests
+        run: mvn verify -Pintegration-test
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: target/failsafe-reports/
