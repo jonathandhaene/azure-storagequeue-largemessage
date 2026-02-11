@@ -144,7 +144,7 @@ public class AzureStorageQueueLargeMessageIT {
         // Then: We should receive exactly one message
         assertEquals(1, messages.size());
 
-        LargeQueueMessage receivedMessage = messages.get(0);
+        LargeQueueMessage receivedMessage = messages.getFirst();
         assertEquals(messageBody, receivedMessage.getBody());
         assertFalse(receivedMessage.isPayloadFromBlob(), "Small message should not be stored in blob");
         assertNull(receivedMessage.getBlobPointer());
@@ -173,7 +173,7 @@ public class AzureStorageQueueLargeMessageIT {
         // Then: We should receive exactly one message
         assertEquals(1, messages.size());
 
-        LargeQueueMessage receivedMessage = messages.get(0);
+        LargeQueueMessage receivedMessage = messages.getFirst();
         assertEquals(largeMessageBody, receivedMessage.getBody());
         assertTrue(receivedMessage.isPayloadFromBlob(), "Large message should be stored in blob");
         assertNotNull(receivedMessage.getBlobPointer());
@@ -206,7 +206,7 @@ public class AzureStorageQueueLargeMessageIT {
         // Then: We should receive the message with metadata preserved
         assertEquals(1, messages.size());
 
-        LargeQueueMessage receivedMessage = messages.get(0);
+        LargeQueueMessage receivedMessage = messages.getFirst();
         assertEquals(messageBody, receivedMessage.getBody());
         assertNotNull(receivedMessage.getMetadata());
         assertEquals("user-123", receivedMessage.getMetadata().get("userId"));
@@ -232,7 +232,7 @@ public class AzureStorageQueueLargeMessageIT {
         List<LargeQueueMessage> messages = client.receiveMessages(10);
         assertEquals(1, messages.size());
 
-        LargeQueueMessage receivedMessage = messages.get(0);
+        LargeQueueMessage receivedMessage = messages.getFirst();
         assertTrue(receivedMessage.isPayloadFromBlob());
         assertNotNull(receivedMessage.getBlobPointer());
 
@@ -319,7 +319,7 @@ public class AzureStorageQueueLargeMessageIT {
 
             // Then: The message should be marked as coming from blob
             assertEquals(1, messages.size());
-            LargeQueueMessage receivedMessage = messages.get(0);
+            LargeQueueMessage receivedMessage = messages.getFirst();
             assertEquals(smallMessageBody, receivedMessage.getBody());
             assertTrue(receivedMessage.isPayloadFromBlob(), 
                 "Message should be stored in blob when always-through-blob is enabled");
