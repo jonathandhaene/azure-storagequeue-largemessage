@@ -2,6 +2,10 @@
 
 A powerful Java Spring Boot library for handling large messages with Azure Storage Queue. This library automatically offloads large message payloads to Azure Blob Storage when they exceed the configured threshold, providing a seamless experience for working with messages of any size.
 
+## Disclaimer
+
+> **⚠️ Disclaimer:** This software is provided "as is", without warranty of any kind, express or implied. The author(s) and maintainer(s) of this project are not responsible for any damage, data loss, service disruption, or other issues that may arise from the use of this software. Use at your own risk. Always test thoroughly in a non-production environment before deploying to production.
+
 ## Features
 
 ### Core Capabilities
@@ -102,3 +106,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Related Projects
 
 - [Azure Service Bus Large Message Client](https://github.com/jonathandhaene/SQS-Java-Spring) - Similar functionality for Azure Service Bus
+
+---
+**Disclaimer:** The maintainer(s) of this project accept no liability for any issues arising from the use of this software. See the LICENSE file for full terms.

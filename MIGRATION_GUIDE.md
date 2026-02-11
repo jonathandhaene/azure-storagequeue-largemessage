@@ -1,5 +1,9 @@
 # Migration Guide: Azure Storage Queue Large Message Client
 
+## Disclaimer
+
+> **⚠️ Disclaimer:** This software is provided "as is", without warranty of any kind, express or implied. The author(s) and maintainer(s) of this project are not responsible for any damage, data loss, service disruption, or other issues that may arise from the use of this software. Use at your own risk. Always test thoroughly in a non-production environment before deploying to production.
+
 This guide provides comprehensive usage examples and best practices for the Azure Storage Queue Large Message Client.
 
 ## Table of Contents
@@ -650,3 +654,6 @@ client.renewMessageLock(message);
 ## Support
 
 For issues, questions, or contributions, please open an issue on GitHub.
+
+---
+**Disclaimer:** The maintainer(s) of this project accept no liability for any issues arising from the use of this software. This guide is provided for informational purposes only. Always validate configurations and code changes in your own environment.
