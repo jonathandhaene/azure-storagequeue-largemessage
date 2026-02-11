@@ -28,9 +28,8 @@ To remove all git history from this repository, you'll need to run the cleanup p
 ### Step 1: Clone and prepare
 ```bash
 # Clone the repository (if not already cloned)
-# Replace the URL below with your actual repository URL
-git clone https://github.com/jonathandhaene/azure-storagequeue-largemessage.git
-cd azure-storagequeue-largemessage
+git clone https://github.com/YOUR-USERNAME/YOUR-REPO.git
+cd YOUR-REPO
 
 # Checkout the branch you want to clean (usually main or master)
 git checkout main  # or master, or your default branch
@@ -80,8 +79,8 @@ After force pushing, inform your team members that they need to:
 ```bash
 # Option 1: Fresh clone (recommended)
 cd ..
-rm -rf azure-storagequeue-largemessage
-git clone https://github.com/jonathandhaene/azure-storagequeue-largemessage.git
+rm -rf YOUR-REPO
+git clone https://github.com/YOUR-USERNAME/YOUR-REPO.git
 
 # Option 2: Hard reset existing clone (loses local changes!)
 git fetch origin
