@@ -1,4 +1,4 @@
-name: Local Tests (Azurite)
+name: Local Integration Tests
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  local-tests:
+  local-integration-tests:
     runs-on: ubuntu-latest
 
     services:
