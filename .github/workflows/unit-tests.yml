@@ -1,3 +1,44 @@
+# ============================================================================
+# UNIT TESTS WORKFLOW
+# ============================================================================
+#
+# Trigger:  Every push to main AND every pull request targeting main.
+# Runner:   ubuntu-latest with JDK 21 (Temurin).
+# Command:  mvn test  (maven-surefire-plugin)
+#
+# What it runs:
+#   All *Test.java files (unit tests). Integration tests (*IT.java) are
+#   explicitly excluded by the surefire plugin config in pom.xml.
+#
+# Test classes executed by this workflow (9 classes):
+#   ┌─────────────────────────────────────────────────────────────────────┐
+#   │ PACKAGE: config                                                    │
+#   │  • DefaultMessageSizeCriteriaTest       – size threshold logic     │
+#   │  • LargeMessageClientConfigurationTest  – config defaults/setters  │
+#   │  • PlainTextConnectionStringProviderTest – connection string holder │
+#   ├─────────────────────────────────────────────────────────────────────┤
+#   │ PACKAGE: model                                                     │
+#   │  • BlobPointerTest                      – serialization & equality │
+#   ├─────────────────────────────────────────────────────────────────────┤
+#   │ PACKAGE: store                                                     │
+#   │  • DefaultBlobNameResolverTest           – UUID blob naming        │
+#   │  • DefaultMessageBodyReplacerTest        – pointer replacement     │
+#   ├─────────────────────────────────────────────────────────────────────┤
+#   │ PACKAGE: util                                                      │
+#   │  • CompressionHandlerTest               – GZIP + Base64 roundtrip │
+#   │  • DeduplicationHandlerTest             – SHA-256 LRU cache        │
+#   │  • RetryHandlerTest                     – exponential backoff      │
+#   └─────────────────────────────────────────────────────────────────────┘
+#
+# NOT tested here (no unit tests exist yet):
+#   • AzureStorageQueueLargeMessageClient  – core client (only integration-tested)
+#   • BlobPayloadStore                     – blob upload/download logic
+#   • SasTokenGenerator                    – SAS token creation
+#   • DeadLetterQueueHandler               – dead-letter queue routing
+#   • LargeQueueMessage                    – message model (getters/setters)
+#   • AzureLargeMessageClientAutoConfiguration – Spring auto-config
+#
+# ============================================================================
 name: Unit Tests
 
 on:
@@ -20,6 +61,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      # Runs maven-surefire-plugin which includes *Test.java, excludes *IT.java
       - name: Run unit tests
         run: mvn test
 

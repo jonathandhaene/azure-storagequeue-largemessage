@@ -1,3 +1,45 @@
+# ============================================================================
+# LOCAL INTEGRATION TESTS WORKFLOW  (Azurite emulator)
+# ============================================================================
+#
+# Trigger:  Every push to main AND every pull request targeting main.
+# Runner:   ubuntu-latest with JDK 21 (Temurin).
+# Services: Azurite storage emulator (blob on :10000, queue on :10001).
+# Command:  mvn verify -Pintegration-test  (maven-failsafe-plugin)
+#
+# What it runs:
+#   All *IT.java files (integration tests) via the "integration-test" Maven
+#   profile. Uses the Azurite connection string from
+#   application-integration-test.yml (falls back to local emulator).
+#
+# Test class executed by this workflow:
+#   ┌─────────────────────────────────────────────────────────────────────┐
+#   │ AzureStorageQueueLargeMessageIT  (8 tests)                        │
+#   │                                                                    │
+#   │  1. Small message send & receive      – inline queue message       │
+#   │  2. Large message send & receive      – blob offloading (>64 KB)   │
+#   │  3. Message with metadata             – custom metadata preserved  │
+#   │  4. Message deletion + blob cleanup   – blob removed on delete     │
+#   │  5. Batch send & receive              – 5 messages in one go       │
+#   │  6. Always-through-blob mode          – force blob for small msgs  │
+#   │  7. Queue statistics                  – approximate message count  │
+#   │  8. Peek messages                     – peek without consuming     │
+#   └─────────────────────────────────────────────────────────────────────┘
+#
+# Features NOT covered by integration tests yet:
+#   • Compression        – compressing payloads before blob upload
+#   • Deduplication      – SHA-256 duplicate detection
+#   • Dead-letter queue  – routing poison messages to a DLQ
+#   • SAS token access   – generating SAS URLs for blob access
+#   • Error scenarios    – network failures, missing blobs, corrupt data
+#   • Receive-only mode  – client that only reads, never sends
+#   • Blob TTL / access tier – lifecycle management settings
+#
+# Relationship to other workflows:
+#   • unit-tests.yml   → runs the *Test.java files (pure unit tests)
+#   • azure-tests.yml  → runs the SAME *IT.java tests against real Azure
+#
+# ============================================================================
 name: Local Integration Tests
 
 on:
@@ -10,12 +52,13 @@ jobs:
   local-integration-tests:
     runs-on: ubuntu-latest
 
+    # Azurite emulates Azure Blob Storage (:10000) and Queue Storage (:10001)
     services:
       azurite:
         image: mcr.microsoft.com/azure-storage/azurite
         ports:
-          - 10000:10000
-          - 10001:10001
+          - 10000:10000  # Blob service
+          - 10001:10001  # Queue service
         options: >-
           --health-cmd "nc -z 127.0.0.1 10000 && nc -z 127.0.0.1 10001"
           --health-interval 10s
@@ -39,6 +82,7 @@ jobs:
           echo "Checking Azurite queue service..."
           curl -v http://127.0.0.1:10001/devstoreaccount1?comp=list || true
 
+      # Activates the "integration-test" profile → maven-failsafe-plugin → *IT.java
       - name: Run local integration tests (Azurite)
         run: mvn verify -Pintegration-test -e
 

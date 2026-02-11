@@ -1,3 +1,31 @@
+# ============================================================================
+# AZURE INTEGRATION TESTS WORKFLOW  (real Azure resources)
+# ============================================================================
+#
+# Trigger:  MANUAL ONLY (workflow_dispatch) – must confirm with boolean input.
+#           This is intentional because it runs against real Azure resources
+#           that incur costs and require secrets.
+# Runner:   ubuntu-latest with JDK 21 (Temurin).
+# Secrets:  AZURE_STORAGE_CONNECTION_STRING (must be configured in repo settings)
+# Command:  mvn verify -Pintegration-test  (maven-failsafe-plugin)
+#
+# What it runs:
+#   The SAME *IT.java test classes as local-tests.yml, but against real
+#   Azure Storage instead of the Azurite emulator. The connection string
+#   env var overrides the Azurite default in application-integration-test.yml.
+#
+# Test class executed by this workflow:
+#   ┌─────────────────────────────────────────────────────────────────────┐
+#   │ AzureStorageQueueLargeMessageIT  (8 tests)                        │
+#   │   (same tests as local-tests.yml – see that file for details)      │
+#   └─────────────────────────────────────────────────────────────────────┘
+#
+# Relationship to other workflows:
+#   • unit-tests.yml    → *Test.java  files (unit tests, no Azure needed)
+#   • local-tests.yml   → *IT.java    files (same tests, Azurite emulator)
+#   • azure-tests.yml   → *IT.java    files (same tests, real Azure) ← THIS
+#
+# ============================================================================
 name: Azure Integration Tests
 
 on:
@@ -24,6 +52,8 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      # Overrides the Azurite default in application-integration-test.yml
+      # with a real Azure connection string from repository secrets
       - name: Run Azure integration tests
         env:
           AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}

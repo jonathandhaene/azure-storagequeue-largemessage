@@ -107,18 +107,18 @@ This library implements the [Claim-Check pattern](https://learn.microsoft.com/en
 | **Retry / resilience for the external store** | All blob operations are wrapped in `RetryHandler`, which uses exponential backoff with jitter. |
 | **Payload lifecycle management** | Blob TTL metadata and `cleanupExpiredBlobs()` helper support time-based payload expiry. |
 | **Extensibility** | Clean interfaces (`BlobNameResolver`, `MessageBodyReplacer`, `MessageSizeCriteria`) allow customisation of blob naming, message body replacement, and offload criteria. |
+| **Orphan blob rollback** | If the queue send fails after a blob upload, the library automatically deletes the orphaned blob. As a safety net, use `blob-ttl-days` so any remaining orphans expire, or configure [Azure Blob Storage lifecycle management policies](https://learn.microsoft.com/en-us/azure/storage/blobs/lifecycle-management-overview). |
+| **GZIP compression** | Set `compression-enabled: true` to GZIP-compress blob payloads automatically. Compression and decompression are transparent to consumers. |
+| **Message deduplication** | Set `deduplication-enabled: true` to enable in-memory SHA-256-based deduplication with an LRU cache. Note: this is local to the JVM — for distributed deduplication, use an external store (e.g., Redis). |
+| **Dead-letter queue** | Set `dead-letter-enabled: true` to automatically move poison messages (exceeded `dead-letter-max-dequeue-count`) to a separate dead-letter queue. The DLQ name defaults to `<queue-name>-dlq`. |
 
 ### Known gaps & considerations
 
-The following items are called out in the Claim-Check pattern guidance but are **not yet addressed** by this library. Evaluate whether they matter for your use case before adopting.
+The following items are called out in the Claim-Check pattern guidance but are **not yet fully addressed** by this library. Evaluate whether they matter for your use case before adopting.
 
-| Area | Detail | Status / Mitigation |
+| Area | Detail | Mitigation |
 |---|---|---|
-| **Orphaned blobs on send failure** | The send flow uploads to blob first, then enqueues. If the queue send fails, an orphaned blob is left. | **Resolved.** The library now automatically rolls back (deletes) the orphaned blob when the queue send fails. As a safety net, use the `blob-ttl-days` setting so any remaining orphaned blobs expire, or configure [Azure Blob Storage lifecycle management policies](https://learn.microsoft.com/en-us/azure/storage/blobs/lifecycle-management-overview). |
-| **Best-effort blob cleanup** | Blob deletion on message delete swallows exceptions. If it fails, the blob remains. `cleanupExpiredBlobs()` exists but must be invoked manually. | **Partially resolved.** Cleanup still swallows exceptions (by design — it must not block the happy path), but `blob-ttl-days` metadata is set on upload, and you can schedule periodic calls to `cleanupExpiredBlobs()` or configure an Azure lifecycle management policy. |
-| **No compression** | Payloads are stored as plain UTF-8 strings with no compression. | **Resolved.** Set `compression-enabled: true` to GZIP-compress blob payloads automatically. Compression and decompression are transparent to consumers. |
-| **No message deduplication** | Consumers may receive the same claim-check more than once. The library does not provide deduplication or idempotent processing. | **Resolved (local).** Set `deduplication-enabled: true` to enable in-memory SHA-256-based deduplication with an LRU cache. Note: this is local to the JVM — for distributed deduplication, use an external store (e.g., Redis). |
-| **No dead-letter queue** | Azure Storage Queue does not have native dead-letter support. The library does not provide a built-in DLQ mechanism. | **Resolved.** Set `dead-letter-enabled: true` to automatically move poison messages (exceeded `dead-letter-max-dequeue-count`) to a separate dead-letter queue. The DLQ name defaults to `<queue-name>-dlq`. |
+| **Best-effort blob cleanup** | Blob deletion on message delete swallows exceptions (by design — it must not block the happy path). If it fails, the blob remains. `cleanupExpiredBlobs()` exists but must be invoked manually. | Set `blob-ttl-days` so metadata is written on upload, then schedule periodic calls to `cleanupExpiredBlobs()` or configure an Azure lifecycle management policy. |
 | **No client-side encryption** | The library relies on Azure's default server-side encryption at rest. There is no option for client-side encryption of payloads before uploading. | Encrypt the message body before passing it to `sendMessage()` and decrypt after `receiveMessages()`. |
 | **No Event Grid integration** | The pattern documentation highlights Azure Event Grid for automatic, event-driven claim-check flows. This library uses a pull-based approach only. | Combine this library with an Event Grid subscription on the blob container if you need push-based notification. |
 

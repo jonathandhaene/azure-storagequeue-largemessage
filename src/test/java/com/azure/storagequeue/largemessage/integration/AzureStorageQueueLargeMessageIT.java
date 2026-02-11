@@ -27,17 +27,55 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Integration tests for AzureStorageQueueLargeMessageClient.
- * Tests the full end-to-end flow with Azure Storage Queue and Blob Storage.
- * 
- * These tests can run against:
- * - Local Azurite emulator (default)
- * - Real Azure cloud resources (set AZURE_STORAGE_CONNECTION_STRING environment variable)
+ * Integration tests for {@link AzureStorageQueueLargeMessageClient}.
+ *
+ * <p><b>Triggered by TWO workflows:</b></p>
+ * <ul>
+ *   <li>{@code local-tests.yml} – on every push/PR to main, against <b>Azurite</b> emulator</li>
+ *   <li>{@code azure-tests.yml} – manual trigger only, against <b>real Azure Storage</b></li>
+ * </ul>
+ * <p>Both workflows run: {@code mvn verify -Pintegration-test} (maven-failsafe-plugin → *IT.java)</p>
+ *
+ * <p><b>What this tests:</b> End-to-end send/receive flows through the
+ * {@link AzureStorageQueueLargeMessageClient}, exercising the full stack:
+ * Queue Client → BlobPayloadStore → Azure Storage (or Azurite).</p>
+ *
+ * <p><b>Coverage summary (8 tests):</b></p>
+ * <ul>
+ *   <li>Small message – stays inline in the queue (no blob)</li>
+ *   <li>Large message (&gt;64KB) – offloaded to blob, retrieved transparently</li>
+ *   <li>Metadata preservation – custom key/value pairs survive round-trip</li>
+ *   <li>Delete with blob cleanup – blob is removed when message is deleted</li>
+ *   <li>Batch send/receive – multiple messages in a single operation</li>
+ *   <li>Always-through-blob mode – forces blob even for small messages</li>
+ *   <li>Queue statistics – approximate message count</li>
+ *   <li>Peek messages – non-consuming read</li>
+ * </ul>
+ *
+ * <p><b>Features NOT yet integration-tested:</b></p>
+ * <ul>
+ *   <li><b>Compression</b> – GZIP payloads before blob upload
+ *       (CompressionHandler is unit-tested, but never used end-to-end)</li>
+ *   <li><b>Deduplication</b> – SHA-256 duplicate detection
+ *       (DeduplicationHandler is unit-tested, but never used end-to-end)</li>
+ *   <li><b>Dead-letter queue</b> – routing poison messages to a DLQ
+ *       (DeadLetterQueueHandler has no tests at all)</li>
+ *   <li><b>SAS token access</b> – generating SAS URLs for blob access
+ *       (SasTokenGenerator has no tests at all)</li>
+ *   <li><b>Error / resilience scenarios</b> – network failures, missing blobs,
+ *       corrupt data, expired SAS tokens</li>
+ *   <li><b>Receive-only mode</b> – client that only reads, never sends</li>
+ *   <li><b>Blob TTL / access tier</b> – lifecycle management settings</li>
+ *   <li><b>Blob key prefix</b> – verified indirectly but not asserted</li>
+ *   <li><b>Retry behaviour</b> – RetryHandler is unit-tested but never
+ *       triggered in integration tests (would need fault injection)</li>
+ * </ul>
  */
 @SpringBootTest(classes = {IntegrationTestConfiguration.class})
 @ActiveProfiles("integration-test")
 @Tag("integration")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@DisplayName("AzureStorageQueueLargeMessageClient – end-to-end integration tests")
 public class AzureStorageQueueLargeMessageIT {
 
     @Autowired
